@@ -50,8 +50,59 @@ def extract_symptoms(df_raw):
 
 
 def extract_pmh(df_raw):
-    # TODO: extract PMH
-    return None
+    """
+    Extract Past Medical History (PMH) features as binary variables.
+    """
+
+    # Select PMH-related columns from the raw form
+    pmh_cols = list(df_raw.columns[37:67])
+    df_pmh_raw = df_raw[pmh_cols].copy()
+
+    # Remove form header rows
+    df_pmh = df_pmh_raw.iloc[3:].reset_index(drop=True)
+
+    # Convert presence-based medical conditions to binary features
+    df_pmh_binary = df_pmh.notna().astype(int)
+
+    # Rename raw unnamed columns to meaningful clinical feature names
+    pmh_rename_map = {
+        'Unnamed: 37': 'Cancer',
+        'Unnamed: 38': 'Organ_Transplant',
+        'Unnamed: 39': 'Chronic_Kidney_Disease',
+        'Unnamed: 40': 'Dialysis',
+        'Unnamed: 41': 'Cancer_Type',
+        'Unnamed: 42': 'Solid_Organ_Transplant',
+        'Unnamed: 43': 'Asthma',
+        'Unnamed: 44': 'Chronic_Respiratory_Disease',
+        'Unnamed: 45': 'Hypertension',
+        'Unnamed: 46': 'Myocardial_Infarction',
+        'Unnamed: 47': 'Valvular_Heart_Disease',
+        'Unnamed: 48': 'Heart_Failure',
+        'Unnamed: 49': 'Hypertriglyceridemia',
+        'Unnamed: 50': 'Hypercholesterolemia',
+        'Unnamed: 51': 'IBD',
+        'Unnamed: 52': 'IBS',
+        'Unnamed: 53': 'Chronic_Hepatitis',
+        'Unnamed: 55': 'Stroke',
+        'Unnamed: 56': 'Seizure',
+        'Unnamed: 57': 'Diabetes_Type1',
+        'Unnamed: 58': 'Diabetes_Type2',
+        'Unnamed: 59': 'Hypothyroidism',
+        'Unnamed: 60': 'Hyperthyroidism',
+        'Unnamed: 61': 'Insulin_Use',
+        'Unnamed: 62': 'Rheumatoid_Arthritis',
+        'Unnamed: 63': 'Lupus',
+        'Unnamed: 64': 'Behcet',
+        'Unnamed: 65': 'Sjogren',
+    }
+
+    df_pmh_binary.rename(columns=pmh_rename_map, inplace=True)
+
+    # Keep only validated PMH features
+    pmh_features = list(pmh_rename_map.values())
+    df_pmh_final = df_pmh_binary[pmh_features].copy()
+
+    return df_pmh_final
 
 
 def extract_covid_history(df_raw):

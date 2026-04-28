@@ -111,8 +111,25 @@ def extract_covid_history(df_raw):
 
 
 def extract_vaccination(df_raw):
-    # TODO: extract vaccination
-    return None
+    # Select vaccination columns
+    vax_cols = ['سابقه واکسیناسیون', 'Unnamed: 100', 'Unnamed: 101']
+    df_vax_raw = df_raw[vax_cols].copy()
+
+    # Remove form header rows
+    df_vax = df_vax_raw.iloc[3:].reset_index(drop=True)
+
+    # Convert vaccine dose column to numeric
+    df_vax['Vaccine_Doses'] = pd.to_numeric(
+        df_vax['Unnamed: 100'],
+        errors='coerce'
+    ).fillna(0)
+
+    # Define vaccination status based on recorded doses
+    df_vax['Vaccinated'] = (df_vax['Vaccine_Doses'] > 0).astype(int)
+
+    df_vax_final = df_vax[['Vaccinated', 'Vaccine_Doses']].copy()
+
+    return df_vax_final
 
 
 def build_features(df_raw):

@@ -135,7 +135,12 @@ def extract_vaccination(df_raw):
 def build_features(df_raw):
     df_symptoms = extract_symptoms(df_raw)
     df_pmh = extract_pmh(df_raw)
-    df_covid = extract_covid_history(df_raw)
     df_vax = extract_vaccination(df_raw)
 
-    return None
+    # merge all features
+    df_final = pd.concat(
+        [df_symptoms, df_pmh, df_vax],
+        axis=1
+    )
+
+    return df_final

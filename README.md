@@ -1,163 +1,193 @@
-# Explainable COVID-19 Risk Prediction
+# 🧠 COVID-19 Risk Prediction System
 
-This project develops an explainable machine learning pipeline for predicting severe COVID-19 outcomes using real-world clinical data.
+A machine learning pipeline for **risk stratification of COVID-19 patients** based on clinical symptoms and medical history.
 
 ---
 
 ## 📌 Project Overview
 
-Real-world clinical datasets are often incomplete, noisy, and difficult to use directly for machine learning.  
-In this project, raw hospital-form data was transformed into structured clinical features such as symptoms, past medical history, COVID-related history, and vaccination status.
+This project aims to support early clinical decision-making by predicting the **risk level of severe COVID-19 involvement** using patient data.
 
-The main objective is to build an interpretable model that can predict the risk of severe COVID-19 outcomes (e.g., ICU admission) using only early-stage patient data.
-
----
-
-## 🎯 Problem Statement
-
-In clinical settings, early identification of high-risk COVID-19 patients is critical. However, available data is often:
-
-- Incomplete (high missing values)
-- Unstructured (form-based inputs)
-- Inconsistent (mixed data types and formats)
-
-This project addresses these challenges by designing a robust feature engineering pipeline and applying machine learning techniques for risk prediction.
+Instead of providing a binary diagnosis, the system outputs a **probability-based risk score**, allowing clinicians to prioritize high-risk patients for further evaluation.
 
 ---
 
-## ⚙️ Key Contributions
+## 🎯 Objective
 
-- Reconstruction of structured data from semi-structured medical forms
-- Feature engineering from real-world clinical records
-- Handling high missingness and noisy data
-- Prevention of data leakage (excluding post-treatment variables)
-- Development of interpretable machine learning models
-- Preparation of a reproducible and modular ML pipeline
+* Predict the likelihood of severe COVID-19 (using CT lung involvement as proxy)
+* Handle highly imbalanced medical data
+* Provide **interpretable and clinically useful outputs**
 
 ---
 
-## 🧠 Feature Engineering
+## ⚠️ Important Note
 
-The following feature groups were extracted and engineered:
+Due to the absence of explicit severity labels (e.g., ICU admission), **CT lung involvement** was used as a proxy for disease severity.
 
-### 1. Present Illness (Symptoms)
-- Fever, Cough, Dyspnea, Anosmia, etc.
-- Converted into binary clinical indicators
+This system is designed as a:
 
-### 2. Past Medical History (PMH)
-- Diabetes (Type 1 & 2), Hypertension, Heart Failure, Asthma, CKD, etc.
-
-### 3. COVID-19 History
-- Previous infection
-- Hospitalization
-- ICU admission
-- Intubation
-
-### 4. Vaccination
-- Vaccinated (binary)
-- Number of doses (numeric)
-
-### 5. Clinical Examination
-- Vital signs and clinical indicators (where available)
+> **Risk stratification tool (screening), NOT a diagnostic system**
 
 ---
 
-## ⚠️ Data Leakage Prevention
+## 📊 Dataset Characteristics
 
-Treatment-related variables (e.g., medications such as antibiotics, antivirals, corticosteroids) were excluded from predictive modeling, as they represent post-diagnosis decisions and could introduce data leakage.
+* Real-world clinical dataset (noisy, incomplete)
+* Highly imbalanced target:
 
----
-
-## 🔒 Data Privacy
-
-The raw clinical dataset is not publicly shared due to privacy and data governance constraints.
-
-This repository provides:
-- The full preprocessing and feature engineering pipeline
-- Model training and evaluation scripts
-
-A synthetic or sample dataset may be added for demonstration purposes.
+  * Severe cases ≪ Non-severe cases
+* Mixed data types (categorical, binary, missing values)
 
 ---
 
-## 🏗️ Project Structure
+## ⚙️ Pipeline
 
-covid-risk-prediction/
-│
-├── notebooks/
-│   └── 01_exploration.ipynb
-│
-├── src/
-│   ├── preprocess.py
-│   ├── features.py
-│   ├── train.py
-│   └── utils.py
-│
-├── data/
-│   ├── raw/          # Not included (privacy)
-│   ├── processed/
-│   └── sample/
-│
-├── outputs/
-│   ├── figures/
-│   └── models/
-│
-├── requirements.txt
-├── .gitignore
-└── README.md
+### 1. Feature Engineering
+
+* Extracted symptom features (e.g., Fever, Cough, Dyspnea)
+* Extracted past medical history (PMH)
+* Cleaned and mapped raw columns into structured features
 
 ---
 
-## 📊 Modeling Approach
+### 2. Target Definition
 
-Planned models include:
-- Logistic Regression (baseline)
-- Random Forest / XGBoost (main models)
+* Used CT scan lung involvement as severity indicator
+* Converted to binary classification:
 
-Evaluation metrics:
-- ROC-AUC
-- Precision / Recall
-- Confusion Matrix
+  * `1 → Lung involvement (high risk)`
+  * `0 → No involvement`
 
 ---
 
-## 🔍 Explainability
+### 3. Handling Class Imbalance
 
-Model interpretability is a key focus of this project. Techniques such as:
+* Applied:
 
-- Feature importance
-- SHAP (Shapley values)
-
-will be used to understand model decisions and highlight clinically relevant predictors.
-
----
-
-## 🚀 Current Status
-
-- [x] Project structure initialized
-- [x] Data privacy rules implemented
-- [x] Exploratory data analysis (EDA)
-- [x] Feature engineering (Symptoms, PMH, Vaccination, COVID History)
-- [ ] Target variable definition
-- [ ] Model training
-- [ ] Model evaluation
-- [ ] Explainability analysis
+  * `class_weight='balanced'`
+  * SMOTE (Synthetic Minority Oversampling Technique)
+* Evaluated impact on recall and precision
 
 ---
 
-## 🧾 Resume Summary
+### 4. Models Evaluated
 
-Developed an explainable machine learning pipeline to predict severe COVID-19 outcomes using real-world clinical data with high missingness and noise.  
-Engineered structured features from unstructured medical forms, handled data quality challenges, and ensured privacy compliance and prevention of data leakage.
-
----
-
-## 💬 Motivation
-
-This project demonstrates the ability to work with real-world healthcare data, handle complex preprocessing challenges, and build interpretable machine learning systems suitable for clinical decision support.
+* Logistic Regression
+* Random Forest
+* XGBoost ✅ (selected)
+* LightGBM
 
 ---
 
-## 📫 Contact
+### 5. Threshold Tuning
 
-For questions or collaboration, feel free to reach out.
+Instead of fixed 0.5 threshold:
+
+* Evaluated thresholds: `0.1 → 0.5`
+* Prioritized **recall for high-risk patients**
+
+---
+
+## 🧠 Final Approach
+
+Reframed the problem as:
+
+> **Risk Prediction instead of Binary Classification**
+
+Model outputs:
+
+* `Risk_Probability` (0–1)
+* `Risk_Level`:
+
+  * Low
+  * Medium
+  * High
+
+---
+
+## 📈 Results
+
+### 🔹 Risk Distribution
+
+![Risk Distribution](outputs/figures/risk_level_distribution.png)
+
+---
+
+### 🔹 Feature Importance (XGBoost)
+
+![Feature Importance](outputs/figures/xgboost_feature_importance.png)
+
+---
+
+### 🔹 Key Insight
+
+* Models achieved **moderate recall for severe cases**
+* Precision remains low due to extreme imbalance
+* System is best suited for **screening and prioritization**
+
+---
+
+## 📁 Outputs
+
+### 📄 Risk Predictions
+
+```
+outputs/risk_predictions.csv
+```
+
+Contains:
+
+| Column           | Description                       |
+| ---------------- | --------------------------------- |
+| Patient_ID       | Unique patient identifier         |
+| Risk_Probability | Predicted probability of severity |
+| Risk_Level       | Low / Medium / High               |
+
+---
+
+## 🏥 Clinical Interpretation
+
+This model provides a **risk score**, not a definitive diagnosis.
+
+* **High Risk** → prioritize for CT scan / monitoring
+* **Medium Risk** → follow-up recommended
+* **Low Risk** → lower probability of severe involvement
+
+---
+
+## 🧪 Technologies Used
+
+* Python
+* Pandas / NumPy
+* Scikit-learn
+* XGBoost
+* Matplotlib
+
+---
+
+## 🚀 Future Improvements
+
+* Add more informative features (lab results, vitals)
+* Improve label quality (ICU / hospitalization)
+* Hyperparameter tuning
+* Model explainability (SHAP)
+
+---
+
+## 👩‍💻 Author
+
+**Atefeh Amjadian**
+AI / Machine Learning Engineer
+
+GitHub: https://github.com/Atefeh-Amjadian
+
+---
+
+## ⭐ Final Note
+
+This project demonstrates the ability to:
+
+* Work with messy real-world medical data
+* Handle class imbalance
+* Design clinically meaningful ML systems
+* Move beyond naive classification into **decision-support systems**

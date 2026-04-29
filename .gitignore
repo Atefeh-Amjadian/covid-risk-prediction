@@ -4,6 +4,9 @@ data/processed/
 *.xlsx
 *.csv
 
+# Allow final prediction output
+!outputs/risk_predictions.csv
+
 # Python
 __pycache__/
 *.pyc

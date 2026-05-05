@@ -173,8 +173,6 @@ This model provides a **risk score**, not a definitive diagnosis.
 * Model explainability (SHAP)
 ---
 
-## Acknowledgment 
-
 ## 🙏 Acknowledgment
 
 This project was developed using real-world clinical data. I would like to sincerely thank Dr. Mehrdad Mansouri for providing access to the dataset and for his valuable guidance on the clinical interpretation of the data.
